@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Природные цвета — радуга звуков</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: linear-gradient(145deg, #1b4b5c 0%, #0f2e3a 100%);
+            font-family: 'Segoe UI', 'Comic Neue', 'Comic Sans MS', cursive, sans-serif;
+        }
+        .game-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 30%, #fff8e7, #ffe0b5);
+            overflow-y: auto;
+            padding: 20px 25px;
+            display: flex;
+            flex-direction: column;
+        }
+        /* Кнопка полноэкранного режима */
+        .fullscreen-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: #ffc285;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: 0.1s linear;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4e2e1a;
+        }
+        .fullscreen-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            padding-right: 50px;
+        }
+        .tab-btn {
+            background: #ffc285;
+            border: none;
+            font-size: 1.3rem;
+            font-family: inherit;
+            font-weight: bold;
+            padding: 8px 25px;
+            border-radius: 50px;
+            color: #4e2e1a;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #a2591c;
+            transition: 0.05s linear;
+        }
+        .tab-btn.active {
+            background: #ff9f4a;
+            color: white;
+            text-shadow: 1px 1px 0 #a2591c;
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #a2591c;
+        }
+        .tab-content {
+            display: none;
+            flex: 1;
+        }
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        h2 {
+            text-align: center;
+            font-size: 1.8rem;
+            color: #c56a1a;
+            margin-bottom: 10px;
+        }
+        .colors-palette {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .color-card {
+            width: 130px;
+            background: white;
+            border-radius: 40px;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+            transition: 0.05s linear;
+        }
+        .color-card:active { transform: scale(0.97); }
+        .color-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 8px;
+            border: 3px solid white;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        }
+        .color-name {
+            font-weight: bold;
+            font-size: 1rem;
+            background: #00000060;
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 30px;
+            color: white;
+            margin: 5px 0;
+        }
+        .nature-icon {
+            font-size: 1.5rem;
+            margin: 5px 0;
+        }
+        .quiz-area {
+            background: rgba(255,248,225,0.9);
+            border-radius: 70px;
+            padding: 25px;
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .question-card {
+            background: #fff3dc;
+            border-radius: 70px;
+            padding: 30px;
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .question-emoji {
+            font-size: 6rem;
+            background: #ffe0a3;
+            display: inline-block;
+            padding: 20px;
+            border-radius: 80px;
+            margin-bottom: 15px;
+        }
+        .question-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #6b3a12;
+        }
+        .quiz-options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .quiz-color {
+            width: 100px;
+            height: 100px;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 10px 0 rgba(0,0,0,0.2);
+            border: 3px solid white;
+            transition: 0.05s linear;
+        }
+        .quiz-color:active { transform: translateY(4px); box-shadow: 0 5px 0 rgba(0,0,0,0.2); }
+        .rainbow-progress {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .rainbow-step {
+            width: 60px;
+            height: 60px;
+            border-radius: 20px;
+            background: #e2cfb0;
+            border: 3px solid #ffde9e;
+        }
+        .rainbow-step.filled {
+            border: 3px solid gold;
+            box-shadow: 0 0 0 2px #fff0b5;
+        }
+        .message {
+            font-size: 1.2rem;
+            background: #fcf3cf;
+            padding: 12px;
+            border-radius: 50px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .reset-quiz {
+            background: #ffaa55;
+            border: none;
+            font-size: 1.2rem;
+            padding: 8px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .settings-group {
+            background: #fff3e0;
+            border-radius: 50px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .settings-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 8px 0;
+        }
+        .settings-row label {
+            font-weight: bold;
+            width: 100px;
+        }
+        input {
+            padding: 6px;
+            border-radius: 30px;
+            border: 1px solid #cca66b;
+            font-family: inherit;
+        }
+        button { cursor: pointer; }
+        
+        /* Адаптация для мобильных устройств */
+        @media (max-width: 700px) {
+            .color-card { width: 100px; }
+            .color-circle { width: 60px; height: 60px; }
+            .quiz-color { width: 70px; height: 70px; }
+            .rainbow-step { width: 45px; height: 45px; }
+            .fullscreen-btn {
+                width: 48px;
+                height: 48px;
+                font-size: 1.5rem;
+                bottom: 15px;
+                right: 15px;
+            }
+            .tabs {
+                padding-right: 40px;
+            }
+        }
+        
+        /* Стиль для полноэкранного режима */
+        .game-container:fullscreen {
+            background: radial-gradient(circle at 20% 30%, #fff8e7, #ffe0b5);
+            padding: 20px 25px;
+        }
+        .game-container:-webkit-full-screen {
+            background: radial-gradient(circle at 20% 30%, #fff8e7, #ffe0b5);
+            padding: 20px 25px;
+        }
+        .game-container:-moz-full-screen {
+            background: radial-gradient(circle at 20% 30%, #fff8e7, #ffe0b5);
+            padding: 20px 25px;
+        }
+    </style>
+</head>
+<body>
+<div class="game-container" id="gameContainer">
+    <!-- Кнопка полноэкранного режима -->
+    <button class="fullscreen-btn" id="fullscreenBtn" title="На весь экран">⛶</button>
+    
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="learn">🎨 Учим цвета</button>
+        <button class="tab-btn" data-tab="quiz">🌈 Игра-угадайка</button>
+        <button class="tab-btn" data-tab="settings">⚙️ Настройки</button>
+    </div>
+
+    <div id="learnTab" class="tab-content active">
+        <h2>🎵 Нажми на цвет – услышишь его природный звук</h2>
+        <div class="colors-palette" id="learningPalette"></div>
+        <div class="message" id="learnMessage">👂 Слушай и запоминай! Если звука нет – проверь папку sounds.</div>
+    </div>
+
+    <div id="quizTab" class="tab-content">
+        <div class="quiz-area">
+            <div class="question-card">
+                <div class="question-emoji" id="questionEmoji">🌅</div>
+                <div class="question-text" id="questionText">Какой цвет подходит этому явлению?</div>
+            </div>
+            <div class="quiz-options" id="quizOptions"></div>
+            <div class="rainbow-progress" id="rainbowProgress"></div>
+            <div class="message" id="quizMessage">🎯 Выбери правильный цвет! 🔊 Слушай подсказку — звук явления.</div>
+            <button class="reset-quiz" id="resetQuizBtn">🔄 Начать игру заново</button>
+        </div>
+    </div>
+
+    <div id="settingsTab" class="tab-content">
+        <h2>📁 Настройка явлений и эмодзи</h2>
+        <div id="settingsList"></div>
+        <div class="message">
+            💡 Звуки берутся из папки <strong>sounds</strong> (рядом с index.html).<br>
+            Имена файлов (обязательно .mp3):<br>
+            <strong>krasnyy.mp3, oranzhevyy.mp3, zheltyy.mp3, zelenyy.mp3, goluboy.mp3, siniy.mp3, fioletovyy.mp3</strong><br>
+            Если файла нет – звук не будет проигрываться.
+        </div>
+        <button id="saveDefaultsBtn" style="margin-top:15px; background:#6f9e3f;">🔁 Сбросить явления к стандартным</button>
+    </div>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // БАЗОВЫЕ ЦВЕТА с корректными вопросами в родительном падеже
+    const DEFAULT_COLORS = [
+        { id: 0, name: "Красный",   color: "#E34234", emoji: "🌅", phenomenon: "восходящего солнца", soundFile: "krasnyy", questionPrefix: "Какой цвет у" },
+        { id: 1, name: "Оранжевый", color: "#FFA500", emoji: "🔥", phenomenon: "костра",    soundFile: "oranzhevyy", questionPrefix: "Какой цвет у" },
+        { id: 2, name: "Жёлтый",    color: "#FFD700", emoji: "🐦", phenomenon: "пения птиц",     soundFile: "zheltyy", questionPrefix: "Какой цвет у" },
+        { id: 3, name: "Зелёный",   color: "#4CAF50", emoji: "🍃", phenomenon: "ветра в лесу",    soundFile: "zelenyy", questionPrefix: "Какой цвет у" },
+        { id: 4, name: "Голубой",   color: "#87CEEB", emoji: "💧", phenomenon: "журчания ручья",  soundFile: "goluboy", questionPrefix: "Какой цвет у" },
+        { id: 5, name: "Синий",     color: "#1E88E5", emoji: "🌧️", phenomenon: "дождя",          soundFile: "siniy", questionPrefix: "Какой цвет у" },
+        { id: 6, name: "Фиолетовый",color: "#AA6DC9", emoji: "❄️", phenomenon: "вьюги",          soundFile: "fioletovyy", questionPrefix: "Какой цвет у" }
+    ];
+
+    let colorsData = [];
+    let audioElements = new Array(7).fill(null);
+    let currentAudio = null;
+
+    // Викторина
+    let quizQuestions = [];
+    let currentQuestionIndex = 0;
+    let correctAnswersCount = 0;
+    let quizActive = true;
+
+    // Функции для полноэкранного режима
+    function toggleFullscreen() {
+        const container = document.getElementById('gameContainer');
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            // Вход в полноэкранный режим
+            if (container.requestFullscreen) {
+                container.requestFullscreen();
+            } else if (container.webkitRequestFullscreen) {
+                container.webkitRequestFullscreen();
+            } else if (container.msRequestFullscreen) {
+                container.msRequestFullscreen();
+            }
+        } else {
+            // Выход из полноэкранного режима
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        }
+    }
+
+    // Обновление иконки кнопки при изменении полноэкранного режима
+    function updateFullscreenButton() {
+        const btn = document.getElementById('fullscreenBtn');
+        if (!btn) return;
+        const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+        if (isFullscreen) {
+            btn.innerHTML = '✖';
+            btn.title = 'Выйти из полноэкранного режима';
+        } else {
+            btn.innerHTML = '⛶';
+            btn.title = 'На весь экран';
+        }
+    }
+
+    // Инициализация звуков
+    function initSounds() {
+        for (let i = 0; i < colorsData.length; i++) {
+            const fileName = colorsData[i].soundFile;
+            const audio = new Audio(`sounds/${fileName}.mp3`);
+            audio.preload = 'auto';
+            audio.onerror = () => {
+                console.warn(`Звук для ${colorsData[i].name} не найден: sounds/${fileName}.mp3`);
+                const msgDiv = document.getElementById('learnMessage');
+                if (msgDiv && document.getElementById('learnTab').classList.contains('active') && !msgDiv.innerHTML.includes('не найден')) {
+                    msgDiv.innerHTML = '⚠️ Некоторые звуки не найдены. Проверьте папку sounds и имена файлов (krasnyy.mp3, oranzhevyy.mp3 и т.д.).';
+                }
+            };
+            audioElements[i] = audio;
+        }
+    }
+
+    function stopCurrentSound() {
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+            currentAudio = null;
+        }
+    }
+
+    function playColorSound(index) {
+        stopCurrentSound();
+        const audio = audioElements[index];
+        if (audio) {
+            audio.currentTime = 0;
+            audio.play().catch(e => {
+                console.warn("Не удалось воспроизвести звук", e);
+                const msgDiv = document.getElementById('learnMessage');
+                if (msgDiv && document.getElementById('learnTab').classList.contains('active')) {
+                    msgDiv.innerHTML = '🔊 Нажми на экран, чтобы включить звук, затем попробуй ещё раз.';
+                }
+            });
+            currentAudio = audio;
+        }
+    }
+
+    function renderLearningTab() {
+        const container = document.getElementById('learningPalette');
+        if (!container) return;
+        container.innerHTML = '';
+        colorsData.forEach((c, idx) => {
+            const card = document.createElement('div');
+            card.className = 'color-card';
+            card.innerHTML = `
+                <div class="color-circle" style="background: ${c.color};"></div>
+                <div class="color-name">${c.name}</div>
+                <div class="nature-icon">${c.emoji} ${c.phenomenon}</div>
+            `;
+            card.addEventListener('click', () => {
+                playColorSound(idx);
+            });
+            container.appendChild(card);
+        });
+    }
+
+    function getQuestionText(colorData) {
+        return `Какой цвет у ${colorData.phenomenon}?`;
+    }
+
+    function playCurrentQuestionSound() {
+        if (!quizActive || currentQuestionIndex >= quizQuestions.length) return;
+        const colorIdx = quizQuestions[currentQuestionIndex];
+        if (colorIdx !== undefined && audioElements[colorIdx]) {
+            setTimeout(() => {
+                if (quizActive && currentQuestionIndex < quizQuestions.length && quizQuestions[currentQuestionIndex] === colorIdx) {
+                    playColorSound(colorIdx);
+                }
+            }, 100);
+        }
+    }
+
+    function initQuiz() {
+        let indices = Array.from({length: colorsData.length}, (_,i) => i);
+        for (let i=indices.length-1; i>0; i--) {
+            const j = Math.floor(Math.random()*(i+1));
+            [indices[i], indices[j]] = [indices[j], indices[i]];
+        }
+        quizQuestions = indices;
+        currentQuestionIndex = 0;
+        correctAnswersCount = 0;
+        quizActive = true;
+        renderQuizQuestion();
+        renderRainbowProgress();
+        document.getElementById('quizMessage').innerHTML = "🎯 Выбери правильный цвет! 🔊 Слушай подсказку — звук явления.";
+        playCurrentQuestionSound();
+    }
+
+    function renderQuizQuestion() {
+        if (!quizActive || currentQuestionIndex >= quizQuestions.length) {
+            if (correctAnswersCount === colorsData.length) {
+                document.getElementById('quizMessage').innerHTML = "🌈 ПОБЕДА! Ты собрал всю радугу! 🎉🎉";
+                playWinMelody();
+                quizActive = false;
+            } else {
+                document.getElementById('quizMessage').innerHTML = "Игра окончена, нажми «Начать заново»";
+                quizActive = false;
+            }
+            const container = document.getElementById('quizOptions');
+            if (container) container.innerHTML = '';
+            return;
+        }
+        
+        const colorIdx = quizQuestions[currentQuestionIndex];
+        const questionColorData = colorsData[colorIdx];
+        document.getElementById('questionEmoji').innerHTML = questionColorData.emoji;
+        document.getElementById('questionText').innerHTML = getQuestionText(questionColorData);
+        
+        let options = [colorIdx];
+        while(options.length < 3 && options.length < colorsData.length) {
+            let r = Math.floor(Math.random() * colorsData.length);
+            if (!options.includes(r)) options.push(r);
+        }
+        options = shuffleArray(options);
+        const container = document.getElementById('quizOptions');
+        container.innerHTML = '';
+        options.forEach(optIdx => {
+            const colorDiv = document.createElement('div');
+            colorDiv.className = 'quiz-color';
+            colorDiv.style.backgroundColor = colorsData[optIdx].color;
+            colorDiv.addEventListener('click', () => {
+                if (!quizActive) return;
+                if (optIdx === colorIdx) {
+                    playSuccessSound();
+                    correctAnswersCount++;
+                    currentQuestionIndex++;
+                    renderRainbowProgress();
+                    if (currentQuestionIndex >= quizQuestions.length) {
+                        renderQuizQuestion();
+                        if (correctAnswersCount === colorsData.length) playWinMelody();
+                    } else {
+                        renderQuizQuestion();
+                        playCurrentQuestionSound();
+                    }
+                } else {
+                    playErrorSound();
+                    document.getElementById('quizMessage').innerHTML = `❌ Неправильно! ${colorsData[optIdx].name} не подходит. Попробуй ещё раз.`;
+                }
+            });
+            container.appendChild(colorDiv);
+        });
+    }
+
+    function renderRainbowProgress() {
+        const container = document.getElementById('rainbowProgress');
+        if (!container) return;
+        container.innerHTML = '';
+        for (let i=0; i<colorsData.length; i++) {
+            const step = document.createElement('div');
+            step.className = 'rainbow-step';
+            if (i < correctAnswersCount) {
+                step.classList.add('filled');
+                if (quizQuestions[i] !== undefined) step.style.backgroundColor = colorsData[quizQuestions[i]]?.color || '#ccc';
+                else step.style.backgroundColor = '#e2cfb0';
+            } else {
+                step.style.backgroundColor = '#e2cfb0';
+            }
+            container.appendChild(step);
+        }
+    }
+
+    function playSuccessSound() {
+        if (!window.AudioContext) return;
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.3);
+        osc.start();
+        osc.stop(ctx.currentTime+0.3);
+        if (ctx.state === 'suspended') ctx.resume();
+    }
+    
+    function playErrorSound() {
+        if (!window.AudioContext) return;
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 220;
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.4);
+        osc.start();
+        osc.stop(ctx.currentTime+0.4);
+        if (ctx.state === 'suspended') ctx.resume();
+    }
+    
+    function playWinMelody() {
+        if (!window.AudioContext) return;
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const notes = [523, 587, 659, 698, 784, 880, 987];
+        let time = ctx.currentTime + 0.05;
+        notes.forEach(f => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.frequency.value = f;
+            gain.gain.setValueAtTime(0.12, time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time+0.25);
+            osc.start(time);
+            osc.stop(time+0.25);
+            time += 0.25;
+        });
+        if (ctx.state === 'suspended') ctx.resume();
+    }
+
+    function shuffleArray(arr) {
+        for (let i=arr.length-1;i>0;i--) {
+            const j=Math.floor(Math.random()*(i+1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function renderSettingsTab() {
+        const container = document.getElementById('settingsList');
+        if (!container) return;
+        container.innerHTML = '';
+        colorsData.forEach((c, idx) => {
+            const settingDiv = document.createElement('div');
+            settingDiv.className = 'settings-group';
+            settingDiv.innerHTML = `
+                <div style="background:${c.color}; padding:8px; border-radius:40px; color:white; font-weight:bold;">${c.name}</div>
+                <div class="settings-row">
+                    <label>Эмодзи:</label>
+                    <input type="text" id="emoji_${idx}" value="${c.emoji}" maxlength="3" style="width:70px">
+                    <label>Явление (в род. падеже):</label>
+                    <input type="text" id="phen_${idx}" value="${c.phenomenon}" placeholder="например: восходящего солнца" style="flex:1; min-width:150px;">
+                </div>
+            `;
+            container.appendChild(settingDiv);
+            const emojiInput = settingDiv.querySelector(`#emoji_${idx}`);
+            const phenInput = settingDiv.querySelector(`#phen_${idx}`);
+            emojiInput.addEventListener('change', (e) => { 
+                colorsData[idx].emoji = e.target.value; 
+                renderLearningTab();
+                if (document.getElementById('quizTab').classList.contains('active')) {
+                    initQuiz();
+                }
+            });
+            phenInput.addEventListener('change', (e) => { 
+                colorsData[idx].phenomenon = e.target.value; 
+                renderLearningTab();
+                if (document.getElementById('quizTab').classList.contains('active')) {
+                    initQuiz();
+                }
+            });
+        });
+    }
+
+    function restoreDefaults() {
+        for (let i=0; i<DEFAULT_COLORS.length; i++) {
+            colorsData[i] = {...DEFAULT_COLORS[i]};
+        }
+        for (let i=0; i<audioElements.length; i++) {
+            if (audioElements[i]) {
+                audioElements[i].pause();
+                audioElements[i].src = '';
+            }
+        }
+        initSounds();
+        renderLearningTab();
+        renderSettingsTab();
+        if (document.getElementById('quizTab').classList.contains('active')) initQuiz();
+        document.getElementById('learnMessage').innerHTML = '👂 Слушай и запоминай!';
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.getElementById(`${tabId}Tab`).classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
+        
+        if (tabId === 'quiz') {
+            initQuiz();
+        }
+        if (tabId === 'learn') {
+            renderLearningTab();
+            stopCurrentSound();
+        }
+        if (tabId === 'settings') {
+            renderSettingsTab();
+            stopCurrentSound();
+        }
+    }
+
+    let audioContextAllowed = false;
+    function enableAudioOnFirstClick() {
+        if (window.AudioContext && !audioContextAllowed) {
+            const ctx = new AudioContext();
+            if (ctx.state === 'suspended') ctx.resume();
+            audioContextAllowed = true;
+        }
+        document.body.removeEventListener('click', enableAudioOnFirstClick);
+        document.body.removeEventListener('touchstart', enableAudioOnFirstClick);
+    }
+
+    function init() {
+        colorsData = DEFAULT_COLORS.map(c => ({...c}));
+        initSounds();
+        renderLearningTab();
+        initQuiz();
+        renderSettingsTab();
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+        });
+        const resetBtn = document.getElementById('resetQuizBtn');
+        if (resetBtn) resetBtn.addEventListener('click', () => {
+            initQuiz();
+        });
+        const defaultsBtn = document.getElementById('saveDefaultsBtn');
+        if (defaultsBtn) defaultsBtn.addEventListener('click', () => restoreDefaults());
+
+        // Полноэкранный режим
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        if (fullscreenBtn) {
+            fullscreenBtn.addEventListener('click', toggleFullscreen);
+        }
+        
+        // Следим за изменениями полноэкранного режима
+        document.addEventListener('fullscreenchange', updateFullscreenButton);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+        document.addEventListener('msfullscreenchange', updateFullscreenButton);
+        
+        updateFullscreenButton();
+
+        document.body.addEventListener('click', enableAudioOnFirstClick);
+        document.body.addEventListener('touchstart', enableAudioOnFirstClick);
+    }
+
+    init();
+</script>
+</body>
+</html>
