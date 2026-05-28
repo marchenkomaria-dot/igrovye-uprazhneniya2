@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Магазин одежды – Собери образ по сезонам</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(145deg, #c0d9e8 0%, #a0b8cc 100%);
+            font-family: 'Segoe UI', 'Comic Neue', 'Comic Sans MS', cursive;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+        }
+
+        .game-container {
+            background: #fffef7;
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.3);
+            max-width: 1400px;
+            width: 100%;
+            height: 95vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: clamp(1.2rem, 5vw, 1.8rem);
+            color: #5a3e2b;
+            text-shadow: 2px 2px 0 #ffd966;
+        }
+
+        .sub {
+            text-align: center;
+            font-size: clamp(0.7rem, 3vw, 1rem);
+            color: #8b6946;
+            margin-bottom: 8px;
+        }
+
+        .stats-panel {
+            background: #f5e6c4;
+            border-radius: 35px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .stats span {
+            background: white;
+            padding: 3px 10px;
+            border-radius: 30px;
+            margin-left: 5px;
+        }
+
+        .stars {
+            background: #ffd966;
+            padding: 3px 12px;
+            border-radius: 30px;
+            font-weight: bold;
+        }
+
+        .achievements {
+            display: flex;
+            gap: 8px;
+            background: #e6d5b8;
+            padding: 5px 12px;
+            border-radius: 35px;
+        }
+
+        .achievement {
+            width: 32px;
+            height: 32px;
+            background: #8b6946;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            filter: grayscale(1);
+            opacity: 0.4;
+            transition: all 0.3s ease;
+        }
+
+        .achievement.unlocked {
+            filter: grayscale(0);
+            opacity: 1;
+            background: #ffd966;
+            transform: scale(1.05);
+            box-shadow: 0 0 8px gold;
+        }
+
+        .fullscreen-btn,
+        .mute-btn {
+            background: #4a6a8a;
+            border: none;
+            border-radius: 30px;
+            padding: 4px 12px;
+            font-size: 0.8rem;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .top-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .game-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .order-card {
+            background: #ffe8d4;
+            border-radius: 35px;
+            padding: 10px;
+            width: 260px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .order-card h3 {
+            text-align: center;
+            color: #b45f1b;
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .order-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border-radius: 30px;
+            padding: 5px 8px;
+            margin-bottom: 10px;
+        }
+
+        .order-icon {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            filter: grayscale(100%) brightness(0.7);
+        }
+
+        .order-desc {
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .voice-btn {
+            background: #ffb347;
+            border: none;
+            border-radius: 35px;
+            padding: 6px;
+            width: 100%;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .character-area {
+            background: #fdf8ed;
+            border-radius: 45px;
+            padding: 12px;
+            text-align: center;
+            width: 360px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .character-area h3 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            color: #b45f1b;
+        }
+
+        .character-svg-container {
+            background: #f0e2c5;
+            border-radius: 50px;
+            padding: 10px;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 350px;
+        }
+
+        svg.character {
+            width: 100%;
+            max-height: 380px;
+            cursor: default;
+        }
+
+        .clothing-info {
+            margin-top: 8px;
+            font-size: 0.7rem;
+            background: #e6d5b8;
+            border-radius: 25px;
+            padding: 5px;
+        }
+
+        .shop {
+            background: #faf0e1;
+            border-radius: 45px;
+            padding: 12px;
+            width: 100%;
+            max-width: 650px;
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .shop h3 {
+            text-align: center;
+            font-size: 1rem;
+            color: #b45f1b;
+            margin-bottom: 8px;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+            gap: 10px;
+            overflow-y: auto;
+        }
+
+        @media (min-width: 1000px) {
+            .items-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        .clothes-item {
+            background: white;
+            border-radius: 30px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.1s;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+            border: 2px solid #ffd966;
+        }
+
+        .clothes-item:hover {
+            transform: scale(1.02);
+            background: #fff4e0;
+        }
+
+        .item-img {
+            width: 55px;
+            height: 55px;
+            object-fit: contain;
+        }
+
+        .item-color {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            margin-top: 5px;
+            border: 2px solid white;
+        }
+
+        .item-name {
+            font-size: 0.65rem;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        .feedback {
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin: 8px auto 0;
+            min-height: 40px;
+        }
+
+        .reset-btn {
+            background: #ff8c42;
+            border: none;
+            padding: 6px 18px;
+            border-radius: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            display: block;
+            margin: 8px auto 0;
+            font-size: 0.8rem;
+        }
+
+        .confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        @media (max-width: 800px) {
+            .game-layout {
+                flex-direction: column;
+                align-items: center;
+                overflow-y: auto;
+            }
+            .order-card, .character-area, .shop {
+                width: 95%;
+                max-width: 400px;
+            }
+            .character-area {
+                width: 95%;
+            }
+            .achievements {
+                gap: 4px;
+            }
+            .achievement {
+                width: 28px;
+                height: 28px;
+                font-size: 1rem;
+            }
+            body {
+                overflow: auto;
+            }
+            .game-container {
+                height: auto;
+                min-height: 98vh;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h1>🛍️ Магазин одежды: Собери образ по сезонам 🧥</h1>
+        <div class="top-buttons">
+            <button class="fullscreen-btn" id="fullscreenBtn">⛶ Во весь экран</button>
+            <button class="mute-btn" id="muteBtn">🔊 Звук вкл.</button>
+        </div>
+    </div>
+    <div class="sub">🎧 Слушай задание, выбирай одежду – человечек станет цветным!</div>
+
+    <div class="stats-panel">
+        <div class="stats">
+            <div>✅ Правильно: <span id="correctCount">0</span></div>
+            <div>❌ Ошибок: <span id="wrongCount">0</span></div>
+        </div>
+        <div class="stars">⭐ <span id="starCount">0</span> / <span id="totalOrders">8</span></div>
+        <div class="achievements" id="achievementsPanel"></div>
+    </div>
+
+    <div class="game-layout">
+        <div class="order-card" id="orderCard">
+            <h3>📋 ТЕКУЩИЙ ЗАКАЗ</h3>
+            <div id="orderList"></div>
+            <button class="voice-btn" id="voiceOrderBtn"><span>🔊</span> Озвучить заказ</button>
+        </div>
+
+        <div class="character-area">
+            <h3 id="characterTitle">Персонаж</h3>
+            <div class="character-svg-container">
+                <svg id="characterSvg" class="character" viewBox="0 0 280 420" xmlns="http://www.w3.org/2000/svg"></svg>
+            </div>
+            <div class="clothing-info" id="clothingInfo">👒: — | 🧥: — | 👖: —</div>
+        </div>
+
+        <div class="shop">
+            <h3>🏬 ВИТРИНА (выбери предмет)</h3>
+            <div class="items-grid" id="shopItems"></div>
+        </div>
+    </div>
+    <div class="feedback" id="feedbackMsg"></div>
+    <button class="reset-btn" id="resetGame">🔄 Начать заново</button>
+</div>
+<canvas id="confettiCanvas" class="confetti-canvas"></canvas>
+
+<script>
+    // --------------------------------------------------------------
+    // КАТАЛОГ ТОВАРОВ (21 предмет)
+    // --------------------------------------------------------------
+    const itemsCatalog = [
+        { type: "head", name: "Красная кепка", shortName: "кепка", color: "Красный", colorCode: "#FF4D4D", imgFile: "red_cap.png", colorFile: "color_red" },
+        { type: "head", name: "Зелёная кепка", shortName: "кепка", color: "Зелёный", colorCode: "#33CC33", imgFile: "green_cap.png", colorFile: "color_green" },
+        { type: "head", name: "Красный бантик", shortName: "бантик", color: "Красный", colorCode: "#FF4D4D", imgFile: "red_bow.png", colorFile: "color_red" },
+        { type: "head", name: "Голубой бантик", shortName: "бантик", color: "Голубой", colorCode: "#66CCFF", imgFile: "blue_bow.png", colorFile: "color_lightblue" },
+        { type: "head", name: "Оранжевая шапка", shortName: "шапка", color: "Оранжевый", colorCode: "#FF8C33", imgFile: "orange_hat.png", colorFile: "color_orange" },
+        { type: "head", name: "Фиолетовая шапка", shortName: "шапка", color: "Фиолетовый", colorCode: "#B84DFF", imgFile: "purple_hat.png", colorFile: "color_purple" },
+        { type: "head", name: "Синяя шапка", shortName: "шапка", color: "Синий", colorCode: "#4D4DFF", imgFile: "blue_hat.png", colorFile: "color_blue" },
+        { type: "torso", name: "Жёлтая футболка", shortName: "футболка", color: "Жёлтый", colorCode: "#FFD700", imgFile: "yellow_tshirt.png", colorFile: "color_yellow" },
+        { type: "torso", name: "Розовое платье", shortName: "платье", color: "Розовый", colorCode: "#FFB6C1", imgFile: "pink_dress.png", colorFile: "color_pink" },
+        { type: "torso", name: "Красное платье", shortName: "платье", color: "Красный", colorCode: "#FF4D4D", imgFile: "red_dress.png", colorFile: "color_red" },
+        { type: "torso", name: "Фиолетовое платье", shortName: "платье", color: "Фиолетовый", colorCode: "#B84DFF", imgFile: "purple_dress.png", colorFile: "color_purple" },
+        { type: "torso", name: "Зелёная куртка", shortName: "куртка", color: "Зелёный", colorCode: "#33CC33", imgFile: "green_jacket.png", colorFile: "color_green" },
+        { type: "torso", name: "Голубая кофта", shortName: "кофта", color: "Голубой", colorCode: "#66CCFF", imgFile: "blue_hoodie.png", colorFile: "color_lightblue" },
+        { type: "torso", name: "Белая блузка", shortName: "блузка", color: "Белый", colorCode: "#FFFFFF", imgFile: "white_blouse.png", colorFile: "color_white" },
+        { type: "legs", name: "Синие шорты", shortName: "шорты", color: "Синий", colorCode: "#4D4DFF", imgFile: "blue_shorts.png", colorFile: "color_blue" },
+        { type: "legs", name: "Красные балетки", shortName: "балетки", color: "Красный", colorCode: "#FF4D4D", imgFile: "red_ballet.png", colorFile: "color_red" },
+        { type: "legs", name: "Розовые балетки", shortName: "балетки", color: "Розовый", colorCode: "#FFB6C1", imgFile: "pink_ballet.png", colorFile: "color_pink" },
+        { type: "legs", name: "Коричневые штаны", shortName: "штаны", color: "Коричневый", colorCode: "#8B4513", imgFile: "brown_trousers.png", colorFile: "color_brown" },
+        { type: "legs", name: "Серые штаны", shortName: "штаны", color: "Серый", colorCode: "#808080", imgFile: "gray_trousers.png", colorFile: "color_gray" },
+        { type: "legs", name: "Синяя юбка", shortName: "юбка", color: "Синий", colorCode: "#4D4DFF", imgFile: "blue_skirt.png", colorFile: "color_blue" },
+        { type: "legs", name: "Зелёные штаны", shortName: "штаны", color: "Зелёный", colorCode: "#33CC33", imgFile: "green_trousers.png", colorFile: "color_green" }
+    ];
+
+    // ЗАКАЗЫ (8)
+    const orders = [
+        { name: "☀️ Летний образ (мальчик)", gender: "boy", requirements: [
+            { part: "head", shortName: "кепка", color: "Красный", colorCode: "#FF4D4D", itemName: "Красная кепка", imgFile: "red_cap.png" },
+            { part: "torso", shortName: "футболка", color: "Жёлтый", colorCode: "#FFD700", itemName: "Жёлтая футболка", imgFile: "yellow_tshirt.png" },
+            { part: "legs", shortName: "шорты", color: "Синий", colorCode: "#4D4DFF", itemName: "Синие шорты", imgFile: "blue_shorts.png" }
+        ] },
+        { name: "☀️ Летний образ (девочка)", gender: "girl", requirements: [
+            { part: "head", shortName: "бантик", color: "Красный", colorCode: "#FF4D4D", itemName: "Красный бантик", imgFile: "red_bow.png" },
+            { part: "torso", shortName: "платье", color: "Розовый", colorCode: "#FFB6C1", itemName: "Розовое платье", imgFile: "pink_dress.png" },
+            { part: "legs", shortName: "балетки", color: "Красный", colorCode: "#FF4D4D", itemName: "Красные балетки", imgFile: "red_ballet.png" }
+        ] },
+        { name: "☀️ Летний образ (девочка 2)", gender: "girl", requirements: [
+            { part: "head", shortName: "бантик", color: "Голубой", colorCode: "#66CCFF", itemName: "Голубой бантик", imgFile: "blue_bow.png" },
+            { part: "torso", shortName: "платье", color: "Красный", colorCode: "#FF4D4D", itemName: "Красное платье", imgFile: "red_dress.png" },
+            { part: "legs", shortName: "балетки", color: "Розовый", colorCode: "#FFB6C1", itemName: "Розовые балетки", imgFile: "pink_ballet.png" }
+        ] },
+        { name: "❄️ Зимний образ (мальчик)", gender: "boy", requirements: [
+            { part: "head", shortName: "шапка", color: "Оранжевый", colorCode: "#FF8C33", itemName: "Оранжевая шапка", imgFile: "orange_hat.png" },
+            { part: "torso", shortName: "куртка", color: "Зелёный", colorCode: "#33CC33", itemName: "Зелёная куртка", imgFile: "green_jacket.png" },
+            { part: "legs", shortName: "штаны", color: "Коричневый", colorCode: "#8B4513", itemName: "Коричневые штаны", imgFile: "brown_trousers.png" }
+        ] },
+        { name: "❄️ Зимний образ (девочка)", gender: "girl", requirements: [
+            { part: "head", shortName: "шапка", color: "Фиолетовый", colorCode: "#B84DFF", itemName: "Фиолетовая шапка", imgFile: "purple_hat.png" },
+            { part: "torso", shortName: "кофта", color: "Голубой", colorCode: "#66CCFF", itemName: "Голубая кофта", imgFile: "blue_hoodie.png" },
+            { part: "legs", shortName: "юбка", color: "Синий", colorCode: "#4D4DFF", itemName: "Синяя юбка", imgFile: "blue_skirt.png" }
+        ] },
+        { name: "❄️ Зимний образ (мальчик 2)", gender: "boy", requirements: [
+            { part: "head", shortName: "шапка", color: "Синий", colorCode: "#4D4DFF", itemName: "Синяя шапка", imgFile: "blue_hat.png" },
+            { part: "torso", shortName: "куртка", color: "Зелёный", colorCode: "#33CC33", itemName: "Зелёная куртка", imgFile: "green_jacket.png" },
+            { part: "legs", shortName: "штаны", color: "Серый", colorCode: "#808080", itemName: "Серые штаны", imgFile: "gray_trousers.png" }
+        ] },
+        { name: "🌸 Весенний образ (мальчик)", gender: "boy", requirements: [
+            { part: "head", shortName: "кепка", color: "Зелёный", colorCode: "#33CC33", itemName: "Зелёная кепка", imgFile: "green_cap.png" },
+            { part: "torso", shortName: "блузка", color: "Белый", colorCode: "#FFFFFF", itemName: "Белая блузка", imgFile: "white_blouse.png" },
+            { part: "legs", shortName: "штаны", color: "Зелёный", colorCode: "#33CC33", itemName: "Зелёные штаны", imgFile: "green_trousers.png" }
+        ] },
+        { name: "🍂 Осенний образ (девочка)", gender: "girl", requirements: [
+            { part: "head", shortName: "бантик", color: "Красный", colorCode: "#FF4D4D", itemName: "Красный бантик", imgFile: "red_bow.png" },
+            { part: "torso", shortName: "платье", color: "Фиолетовый", colorCode: "#B84DFF", itemName: "Фиолетовое платье", imgFile: "purple_dress.png" },
+            { part: "legs", shortName: "балетки", color: "Розовый", colorCode: "#FFB6C1", itemName: "Розовые балетки", imgFile: "pink_ballet.png" }
+        ] }
+    ];
+
+    // ---------- Глобальные переменные ----------
+    let muted = false;
+    let currentAudio = null;
+    let orderCompletionLock = false;
+    let currentOrderIndex = 0;
+    let starsEarned = 0, correctAnswers = 0, wrongAnswers = 0;
+    let achievementsUnlocked = [false, false, false, false, false, false, false, false];
+    let wornItems = { head: null, torso: null, legs: null };
+    let itemsAvailability = new Array(itemsCatalog.length).fill(true);
+    let headElement = null, torsoElement = null, legsElements = [];
+
+    const achievementsList = ["😊", "🌈", "🦄", "🎨", "⭐", "🌸", "❄️", "🏆"];
+
+    const orderListDiv = document.getElementById('orderList');
+    const shopItemsDiv = document.getElementById('shopItems');
+    const starSpan = document.getElementById('starCount');
+    const totalOrdersSpan = document.getElementById('totalOrders');
+    const correctSpan = document.getElementById('correctCount');
+    const wrongSpan = document.getElementById('wrongCount');
+    const feedbackDiv = document.getElementById('feedbackMsg');
+    const resetBtn = document.getElementById('resetGame');
+    const voiceBtn = document.getElementById('voiceOrderBtn');
+    const clothingInfo = document.getElementById('clothingInfo');
+    const characterTitle = document.getElementById('characterTitle');
+    const muteBtn = document.getElementById('muteBtn');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const achievementsPanel = document.getElementById('achievementsPanel');
+
+    totalOrdersSpan.innerText = orders.length;
+
+    function createAchievementsPanel() {
+        achievementsPanel.innerHTML = '';
+        for (let i = 0; i < achievementsList.length; i++) {
+            const ach = document.createElement('div');
+            ach.className = 'achievement';
+            ach.id = `achievement_${i}`;
+            ach.innerHTML = achievementsList[i];
+            achievementsPanel.appendChild(ach);
+        }
+    }
+
+    function updateAchievements() {
+        for (let i = 0; i < achievementsList.length; i++) {
+            const achElement = document.getElementById(`achievement_${i}`);
+            if (starsEarned >= i + 1 && !achievementsUnlocked[i]) {
+                achievementsUnlocked[i] = true;
+                achElement.classList.add('unlocked');
+                feedbackDiv.innerHTML = `🎉 Ты получил достижение ${achievementsList[i]}! 🎉`;
+                setTimeout(() => {
+                    if (feedbackDiv.innerHTML.includes("достижение")) feedbackDiv.innerHTML = '';
+                }, 2000);
+            }
+        }
+        
+        if (starsEarned === 8 && !window.gameCompletedFlag) {
+            window.gameCompletedFlag = true;
+            startSuperFirework();
+            setTimeout(() => {
+                alert("🏆 ПОЗДРАВЛЯЕМ! 🏆\nТы собрал все 8 образов и получил КУБОК!\nТы настоящий стилист!");
+            }, 500);
+        }
+    }
+
+    function startSuperFirework() {
+        const canvas = document.getElementById('confettiCanvas');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        
+        for (let i = 0; i < 300; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height - canvas.height,
+                size: Math.random() * 8 + 3,
+                color: `hsl(${Math.random() * 360}, 80%, 60%)`,
+                speedY: Math.random() * 6 + 3,
+                speedX: (Math.random() - 0.5) * 3
+            });
+        }
+        
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let active = false;
+            for (let p of particles) {
+                p.y += p.speedY;
+                p.x += p.speedX;
+                if (p.y < canvas.height + 100) active = true;
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+                ctx.fillStyle = `rgba(255,255,100,0.8)`;
+                ctx.fillRect(p.x - 2, p.y - 2, 3, 3);
+            }
+            if (active) requestAnimationFrame(animate);
+            else canvas.style.display = 'none';
+        }
+        
+        canvas.style.display = 'block';
+        animate();
+        setTimeout(() => {
+            canvas.style.display = 'none';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }, 5000);
+        
+        playSound("complete_all");
+    }
+
+    function stopCurrentAudio() {
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+            currentAudio = null;
+        }
+    }
+
+    function playSound(fileName) {
+        if (!fileName || muted) return;
+        stopCurrentAudio();
+        const audio = new Audio(`audio/${fileName}.ogg`);
+        currentAudio = audio;
+        audio.play().catch(e => console.log("Звук не воспроизведён:", fileName, e));
+        audio.onended = () => { if (currentAudio === audio) currentAudio = null; };
+    }
+
+    function playColorSound(colorFile) {
+        if (colorFile && !muted) playSound(colorFile);
+    }
+
+    function speakOrder() {
+        if (currentOrderIndex >= orders.length) {
+            playSound("complete_all");
+            return;
+        }
+        playSound(`order${currentOrderIndex + 1}`);
+    }
+
+    // Похвала ТОЛЬКО при завершении заказа (на 3-й вещи)
+    function playResultForStep(stepNumber) {
+        // Убрали good и great, оставили только super при завершении заказа
+        if (stepNumber === 3) {
+            playSound("super");
+        }
+        // Больше никаких похвал
+    }
+
+    function drawCharacter(gender, headColor, torsoColor, legsColor) {
+        const svg = document.getElementById('characterSvg');
+        const bodyBase = "#f5e2c0";
+        const hairColor = gender === "boy" ? "#8B5A2B" : "#6B3E1A";
+        const eyeColor = "#2C2C2C";
+        
+        const finalHeadColor = headColor || bodyBase;
+        const finalTorsoColor = torsoColor || bodyBase;
+        const finalLegsColor = legsColor || bodyBase;
+
+        let svgContent = `
+            <circle id="headPart" cx="140" cy="85" r="38" fill="${finalHeadColor}" stroke="#b08a5c" stroke-width="2"/>
+            <rect id="torsoPart" x="110" y="118" width="60" height="100" rx="12" fill="${finalTorsoColor}" stroke="#b08a5c" stroke-width="2"/>
+            <rect x="85" y="125" width="28" height="65" rx="10" fill="${finalTorsoColor}" stroke="#b08a5c" stroke-width="2"/>
+            <rect x="167" y="125" width="28" height="65" rx="10" fill="${finalTorsoColor}" stroke="#b08a5c" stroke-width="2"/>
+            <rect id="legLeft" x="120" y="210" width="18" height="55" fill="${finalLegsColor}" stroke="#b08a5c" stroke-width="2"/>
+            <rect id="legRight" x="142" y="210" width="18" height="55" fill="${finalLegsColor}" stroke="#b08a5c" stroke-width="2"/>
+            <circle cx="125" cy="78" r="4" fill="${eyeColor}"/>
+            <circle cx="155" cy="78" r="4" fill="${eyeColor}"/>
+            <path d="M132 95 Q140 102 148 95" stroke="#b45f1b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        `;
+        
+        if (gender === "boy") {
+            svgContent += `<path d="M105 60 Q115 45 140 48 Q165 45 175 60" stroke="${hairColor}" stroke-width="8" fill="none" stroke-linecap="round"/>`;
+        } else {
+            svgContent += `<circle cx="140" cy="55" r="16" fill="${hairColor}"/>`;
+            svgContent += `<path d="M125 68 L115 85 L100 80 Z" fill="#FFB6C1" opacity="0.9"/>`;
+            svgContent += `<path d="M155 68 L165 85 L180 80 Z" fill="#FFB6C1" opacity="0.9"/>`;
+        }
+        
+        svg.innerHTML = svgContent;
+        headElement = document.getElementById('headPart');
+        torsoElement = document.getElementById('torsoPart');
+        legsElements = [document.getElementById('legLeft'), document.getElementById('legRight')];
+    }
+
+    function updateBodyColor(part, colorCode) {
+        if (part === 'head' && headElement) headElement.setAttribute('fill', colorCode);
+        if (part === 'torso' && torsoElement) torsoElement.setAttribute('fill', colorCode);
+        if (part === 'legs') legsElements.forEach(leg => leg.setAttribute('fill', colorCode));
+    }
+
+    function updateStats() {
+        correctSpan.innerText = correctAnswers;
+        wrongSpan.innerText = wrongAnswers;
+        starSpan.innerText = starsEarned;
+        updateAchievements();
+        
+        if (starsEarned === orders.length && !orderCompletionLock && starsEarned === 8) {
+            if (!window.gameCompletedFlag) {
+                window.gameCompletedFlag = true;
+                startSuperFirework();
+            }
+        }
+    }
+
+    function renderOrder() {
+        if (currentOrderIndex >= orders.length) {
+            orderListDiv.innerHTML = '<p style="text-align:center">✨ Все заказы выполнены! ✨</p>';
+            return;
+        }
+        const order = orders[currentOrderIndex];
+        let html = `<div style="font-weight:bold; text-align:center;">${order.name}</div>`;
+        order.requirements.forEach(req => {
+            let partText = "";
+            if (req.shortName === "кепка") partText = "🧢 Кепка";
+            else if (req.shortName === "шапка") partText = "🧤 Шапка";
+            else if (req.shortName === "бантик") partText = "🎀 Бантик";
+            else if (req.shortName === "футболка") partText = "👕 Футболка";
+            else if (req.shortName === "платье") partText = "👗 Платье";
+            else if (req.shortName === "куртка") partText = "🧥 Куртка";
+            else if (req.shortName === "кофта") partText = "👚 Кофта";
+            else if (req.shortName === "блузка") partText = "👔 Блузка";
+            else if (req.shortName === "шорты") partText = "🩳 Шорты";
+            else if (req.shortName === "штаны") partText = "👖 Штаны";
+            else if (req.shortName === "юбка") partText = "👗 Юбка";
+            else if (req.shortName === "балетки") partText = "🩰 Балетки";
+            else partText = "📦 " + req.shortName;
+            
+            html += `
+                <div class="order-item">
+                    <img class="order-icon" src="images/${req.imgFile}" alt="${req.itemName}" onerror="this.style.display='none'">
+                    <div class="order-desc">${partText}<br>
+                        <span style="background:${req.colorCode}; padding:2px 8px; border-radius:20px; color:${req.color === 'Белый' ? 'black' : 'white'};">${req.color}</span>
+                    </div>
+                </div>
+            `;
+        });
+        orderListDiv.innerHTML = html;
+        characterTitle.innerText = order.name;
+        drawCharacter(order.gender, wornItems.head?.colorCode || "#f5e2c0", wornItems.torso?.colorCode || "#f5e2c0", wornItems.legs?.colorCode || "#f5e2c0");
+        updateCharacterDisplay();
+    }
+
+    function updateCharacterDisplay() {
+        clothingInfo.innerHTML = `👒: ${wornItems.head?.name || "—"} | 🧥: ${wornItems.torso?.name || "—"} | 👖: ${wornItems.legs?.name || "—"}`;
+        if (headElement && wornItems.head) headElement.setAttribute('fill', wornItems.head.colorCode);
+        if (torsoElement && wornItems.torso) torsoElement.setAttribute('fill', wornItems.torso.colorCode);
+        if (legsElements.length && wornItems.legs) legsElements.forEach(leg => leg.setAttribute('fill', wornItems.legs.colorCode));
+    }
+
+    function isCurrentOrderComplete() {
+        if (currentOrderIndex >= orders.length) return false;
+        const order = orders[currentOrderIndex];
+        for (let req of order.requirements) {
+            if (!wornItems[req.part] || wornItems[req.part].color !== req.color) return false;
+        }
+        return true;
+    }
+
+    function completeOrderWithDelay() {
+        if (orderCompletionLock) return;
+        orderCompletionLock = true;
+        starsEarned++;
+        updateStats();
+        feedbackDiv.innerHTML = "🎉 Отлично! Заказ выполнен! +1 звезда 🎉";
+
+        setTimeout(() => {
+            currentOrderIndex++;
+            wornItems = { head: null, torso: null, legs: null };
+            itemsAvailability.fill(true);
+            renderShop();
+            renderOrder();
+            if (currentOrderIndex === orders.length) {
+                feedbackDiv.innerHTML = "🏆 ПОЗДРАВЛЯЕМ! Ты выполнил все заказы! 🏆";
+            } else {
+                feedbackDiv.innerHTML = "";
+            }
+            orderCompletionLock = false;
+        }, 1500);
+    }
+
+    function tryWearItem(item, index) {
+        if (orderCompletionLock) {
+            feedbackDiv.innerHTML = "Подожди, сейчас перейду к следующему заказу...";
+            return;
+        }
+        if (currentOrderIndex >= orders.length) {
+            feedbackDiv.innerHTML = "Игра завершена! Нажмите «Начать заново».";
+            return;
+        }
+        if (!itemsAvailability[index]) {
+            feedbackDiv.innerHTML = "Этот предмет уже использован!";
+            return;
+        }
+
+        // Озвучиваем цвет предмета при клике
+        playColorSound(item.colorFile);
+
+        const order = orders[currentOrderIndex];
+        const requirement = order.requirements.find(req => req.part === item.type);
+        if (!requirement) {
+            feedbackDiv.innerHTML = `Сейчас не нужна эта вещь. Смотри в заказ!`;
+            playSound("wrong");
+            wrongAnswers++; updateStats();
+            return;
+        }
+        if (item.color !== requirement.color) {
+            feedbackDiv.innerHTML = `❌ Неверно! Для ${requirement.shortName} нужен ${requirement.color} цвет.`;
+            playSound("wrong");
+            wrongAnswers++; updateStats();
+            return;
+        }
+        if (wornItems[item.type] !== null) {
+            feedbackDiv.innerHTML = `На эту часть уже надета вещь. Нажми «Начать заново».`;
+            return;
+        }
+
+        wornItems[item.type] = item;
+        itemsAvailability[index] = false;
+        const wornCount = Object.values(wornItems).filter(v => v !== null).length;
+        
+        // Похвала ТОЛЬКО при завершении заказа (на 3-й вещи)
+        playResultForStep(wornCount);
+        
+        correctAnswers++;
+        updateStats();
+
+        if (item.type === 'head') updateBodyColor('head', item.colorCode);
+        if (item.type === 'torso') updateBodyColor('torso', item.colorCode);
+        if (item.type === 'legs') updateBodyColor('legs', item.colorCode);
+        updateCharacterDisplay();
+        renderShop();
+
+        if (isCurrentOrderComplete()) {
+            completeOrderWithDelay();
+        } else {
+            feedbackDiv.innerHTML = `✅ ${item.name} надета!`;
+        }
+    }
+
+    function renderShop() {
+        if (currentOrderIndex >= orders.length) {
+            shopItemsDiv.innerHTML = '<p style="text-align:center">🎉 Игра окончена 🎉</p>';
+            return;
+        }
+        shopItemsDiv.innerHTML = '';
+        for (let i = 0; i < itemsCatalog.length; i++) {
+            if (itemsAvailability[i]) {
+                const item = itemsCatalog[i];
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'clothes-item';
+                itemDiv.innerHTML = `
+                    <img class="item-img" src="images/${item.imgFile}" alt="${item.name}" onerror="this.style.display='none'">
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-color" style="background:${item.colorCode};"></div>
+                `;
+                itemDiv.addEventListener('click', (function(idx) {
+                    return function() { tryWearItem(itemsCatalog[idx], idx); };
+                })(i));
+                shopItemsDiv.appendChild(itemDiv);
+            }
+        }
+        if (shopItemsDiv.children.length === 0) shopItemsDiv.innerHTML = '<p>Все вещи использованы!</p>';
+    }
+
+    function resetGame() {
+        stopCurrentAudio();
+        orderCompletionLock = false;
+        currentOrderIndex = 0;
+        starsEarned = 0;
+        correctAnswers = 0;
+        wrongAnswers = 0;
+        window.gameCompletedFlag = false;
+        
+        for (let i = 0; i < achievementsUnlocked.length; i++) {
+            achievementsUnlocked[i] = false;
+            const achElement = document.getElementById(`achievement_${i}`);
+            if (achElement) achElement.classList.remove('unlocked');
+        }
+        
+        wornItems = { head: null, torso: null, legs: null };
+        itemsAvailability.fill(true);
+        renderShop();
+        renderOrder();
+        updateStats();
+        feedbackDiv.innerHTML = "Игра началась заново! Выполняй заказы!";
+        const canvas = document.getElementById('confettiCanvas');
+        canvas.style.display = 'none';
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
+    }
+
+    function toggleMute() {
+        muted = !muted;
+        if (muted) { stopCurrentAudio(); muteBtn.innerHTML = "🔇 Звук выкл."; }
+        else { muteBtn.innerHTML = "🔊 Звук вкл."; }
+    }
+
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
+    muteBtn.addEventListener('click', toggleMute);
+    voiceBtn.addEventListener('click', speakOrder);
+    resetBtn.addEventListener('click', resetGame);
+
+    createAchievementsPanel();
+    renderOrder();
+    renderShop();
+    updateStats();
+</script>
+</body>
+</html>
