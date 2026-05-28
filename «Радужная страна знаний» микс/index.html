@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Корниенко Мария Алексеевна, г.Черемхово">
+    <title>Радужная страна знаний – с голосом и диагностикой</title>
+    <style>
+        * { box-sizing: border-box; user-select: none; }
+        body {
+            background: linear-gradient(145deg, #2b3b4e 0%, #1b2a36 100%);
+            font-family: 'Segoe UI', 'Comic Neue', 'Comic Sans MS', cursive;
+            margin: 0;
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .game-container {
+            background: #fff9ef;
+            border-radius: 50px;
+            padding: 20px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+        h1 { text-align: center; margin: 0 0 5px; color: #5a3e2b; text-shadow: 2px 2px 0 #ffd966; font-size: clamp(1.4rem, 6vw, 2.2rem); }
+        .sub { text-align: center; color: #8b6946; margin-bottom: 20px; font-size: clamp(0.8rem, 4vw, 1.1rem); }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .progress-panel {
+            background: #f5e6c4;
+            border-radius: 40px;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            flex: 1;
+        }
+        .stars { font-size: 1.5rem; font-weight: bold; background: #ffd966; padding: 5px 15px; border-radius: 40px; }
+        .stickers { display: flex; gap: 12px; }
+        .sticker { font-size: 1.8rem; filter: grayscale(1); opacity: 0.5; transition: 0.2s; }
+        .sticker.unlocked { filter: grayscale(0); opacity: 1; transform: scale(1.05); }
+        .buttons-panel { display: flex; gap: 8px; flex-wrap: wrap; }
+        .ctrl-btn { background: #4a6a8a; border: none; border-radius: 40px; padding: 6px 15px; font-size: 0.9rem; font-weight: bold; color: white; cursor: pointer; transition: 0.1s; }
+        .ctrl-btn:active { transform: scale(0.96);}
+        .teacher-btn { background: #9b59b6; }
+        .main-layout { display: flex; gap: 25px; flex-wrap: wrap; }
+        .game-field { flex: 3; min-width: 280px; }
+        .task-sidebar {
+            flex: 1; min-width: 280px; background: #fff2df; border-radius: 45px;
+            padding: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column; justify-content: flex-start;
+        }
+        .task-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .task-title { font-size: 1.3rem; font-weight: bold; color: #b45f1b; }
+        .task-question { font-size: 1.2rem; background: #ffe2b5; padding: 15px; border-radius: 30px; margin: 10px 0; }
+        .options { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin: 15px 0; }
+        .option-btn {
+            border: none; padding: 12px 20px; border-radius: 40px; font-size: 1rem;
+            font-family: inherit; font-weight: bold; cursor: pointer; color: white;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.3); box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .color-square { width: 80px; height: 80px; border-radius: 40px; border: 2px solid white; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .feedback { text-align: center; font-size: 1rem; min-height: 50px; margin-top: 10px; }
+        .grid { display: flex; flex-direction: column; gap: 12px; }
+        .row { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+        .cell {
+            width: 90px; height: 90px; border-radius: 25px; cursor: pointer;
+            transition: 0.2s; box-shadow: 0 8px 0 rgba(0,0,0,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 1.8rem; color: white;
+            text-shadow: 1px 1px 0 black; position: relative;
+        }
+        .cell.completed { background: #aaa !important; cursor: default; transform: none; box-shadow: 0 3px 0 rgba(0,0,0,0.2); }
+        .cell.completed::after { content: "⭐"; font-size: 2rem; position: absolute; top: 5px; right: 5px; text-shadow: none; }
+        @media (max-width: 900px) { .main-layout { flex-direction: column; } .cell { width: 70px; height: 70px; font-size: 1.4rem; } .row { gap: 10px; } }
+
+        /* Цвета строк (исправленные) */
+        /* Красный ряд */
+        .row[data-row="0"] .cell[data-level="0"] { background: #FFB3B3; }
+        .row[data-row="0"] .cell[data-level="1"] { background: #FF8080; }
+        .row[data-row="0"] .cell[data-level="2"] { background: #FF4D4D; }
+        .row[data-row="0"] .cell[data-level="3"] { background: #CC0000; }
+        .row[data-row="0"] .cell[data-level="4"] { background: #8B0000; }
+        /* Оранжевый ряд – более яркие, рыжие оттенки */
+        .row[data-row="1"] .cell[data-level="0"] { background: #FFC04C; }
+        .row[data-row="1"] .cell[data-level="1"] { background: #FFA500; }
+        .row[data-row="1"] .cell[data-level="2"] { background: #FF8C00; }
+        .row[data-row="1"] .cell[data-level="3"] { background: #FF6A00; }
+        .row[data-row="1"] .cell[data-level="4"] { background: #FF4F00; }
+        /* Жёлтый ряд – исправлен 5-й уровень на ярко-жёлтый D4A000 */
+        .row[data-row="2"] .cell[data-level="0"] { background: #FFFF66; }
+        .row[data-row="2"] .cell[data-level="1"] { background: #FFEE33; }
+        .row[data-row="2"] .cell[data-level="2"] { background: #FFD700; }
+        .row[data-row="2"] .cell[data-level="3"] { background: #E6B800; }
+        .row[data-row="2"] .cell[data-level="4"] { background: #D4A000; }  /* ярко-жёлтый, не оливковый */
+        /* Зелёный ряд */
+        .row[data-row="3"] .cell[data-level="0"] { background: #B3FFB3; }
+        .row[data-row="3"] .cell[data-level="1"] { background: #80FF80; }
+        .row[data-row="3"] .cell[data-level="2"] { background: #33CC33; }
+        .row[data-row="3"] .cell[data-level="3"] { background: #008000; }
+        .row[data-row="3"] .cell[data-level="4"] { background: #004D00; }
+        /* Голубой ряд */
+        .row[data-row="4"] .cell[data-level="0"] { background: #CCFFFF; }
+        .row[data-row="4"] .cell[data-level="1"] { background: #99FFFF; }
+        .row[data-row="4"] .cell[data-level="2"] { background: #66CCFF; }
+        .row[data-row="4"] .cell[data-level="3"] { background: #3399CC; }
+        .row[data-row="4"] .cell[data-level="4"] { background: #006699; }
+        /* Синий ряд */
+        .row[data-row="5"] .cell[data-level="0"] { background: #B3B3FF; }
+        .row[data-row="5"] .cell[data-level="1"] { background: #8080FF; }
+        .row[data-row="5"] .cell[data-level="2"] { background: #4D4DFF; }
+        .row[data-row="5"] .cell[data-level="3"] { background: #0000CC; }
+        .row[data-row="5"] .cell[data-level="4"] { background: #000066; }
+        /* Фиолетовый ряд */
+        .row[data-row="6"] .cell[data-level="0"] { background: #E6B3FF; }
+        .row[data-row="6"] .cell[data-level="1"] { background: #CC80FF; }
+        .row[data-row="6"] .cell[data-level="2"] { background: #B84DFF; }
+        .row[data-row="6"] .cell[data-level="3"] { background: #7B2D99; }
+        .row[data-row="6"] .cell[data-level="4"] { background: #4A1A66; }
+
+        .reset-btn { background: #ff8c42; border: none; padding: 8px 20px; border-radius: 30px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        
+        /* Панель педагога */
+        .teacher-panel {
+            margin-top: 30px;
+            background: #ecf0f1;
+            border-radius: 40px;
+            padding: 20px;
+            transition: all 0.2s;
+            display: none;
+        }
+        .teacher-panel.visible { display: block; }
+        .teacher-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
+        .teacher-name-area { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: white; padding: 8px 20px; border-radius: 40px; }
+        .teacher-name-area input { padding: 8px 15px; border-radius: 30px; border: 1px solid #bdc3c7; font-family: inherit; font-size: 1rem; }
+        .teacher-name-area button, .teacher-actions button { background: #2c3e50; border: none; color: white; padding: 6px 16px; border-radius: 30px; cursor: pointer; font-weight: bold; transition: 0.1s; }
+        .teacher-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .teacher-actions button { background: #16a085; }
+        .teacher-actions .clear-log-btn { background: #e67e22; }
+        .teacher-actions .export-btn { background: #2980b9; }
+        .log-table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 30px;
+            background: white;
+            padding: 5px;
+        }
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .log-table th, .log-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+        .log-table th {
+            background: #f39c12;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        .log-table tr.wrong { background-color: #ffe6e6; }
+        .log-table tr.correct { background-color: #e6ffe6; }
+        .current-student-badge { background: #f1c40f; border-radius: 40px; padding: 4px 12px; font-weight: bold; }
+        .confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; }
+        .hidden-author { display: none; }
+    </style>
+</head>
+<body>
+<div class="hidden-author" aria-hidden="true">Автор: Корниенко Мария Алексеевна, г.Черемхово</div>
+
+<div class="game-container">
+    <h1>🌈 Радужная страна знаний 🌈</h1>
+    <div class="sub">Нажимай на клетку – задание прочитает твой голос</div>
+
+    <div class="top-bar">
+        <div class="progress-panel">
+            <div class="stars">⭐ <span id="starCount">0</span> / 35</div>
+            <div class="stickers" id="stickerPanel">
+                <div class="sticker" data-sticker="0">😊</div>
+                <div class="sticker" data-sticker="1">🌈</div>
+                <div class="sticker" data-sticker="2">🦄</div>
+                <div class="sticker" data-sticker="3">🎨</div>
+                <div class="sticker" data-sticker="4">🏆</div>
+            </div>
+        </div>
+        <div class="buttons-panel">
+            <button class="ctrl-btn" id="fullscreenBtn">⛶ Во весь экран</button>
+            <button class="ctrl-btn" id="muteVoiceBtn">🔊 Звук вкл.</button>
+            <button class="ctrl-btn" id="forceAudioBtn">🎧 Разрешить звук</button>
+            <button class="ctrl-btn teacher-btn" id="toggleTeacherBtn">👩‍🏫 Педагог</button>
+        </div>
+    </div>
+
+    <div class="main-layout">
+        <div class="game-field">
+            <div class="grid" id="grid"></div>
+            <button class="reset-btn" id="resetGame">🔄 Начать заново</button>
+        </div>
+        <div class="task-sidebar">
+            <div class="task-header"><span class="task-title" id="taskTitle">✔️ Задание</span></div>
+            <div><div class="task-question" id="questionText">Нажми на любую цветную клетку</div>
+            <div class="options" id="optionsContainer"></div>
+            <div class="feedback" id="feedbackMsg"></div></div>
+        </div>
+    </div>
+
+    <!-- Панель педагога (диагностика) -->
+    <div id="teacherPanel" class="teacher-panel">
+        <div class="teacher-header">
+            <div class="teacher-name-area">
+                <span>👩‍🏫 Имя ученика:</span>
+                <input type="text" id="studentNameInput" placeholder="Введите имя" value="">
+                <button id="setStudentNameBtn">✅ Установить</button>
+                <div id="currentStudentBadge" class="current-student-badge">Текущий: —</div>
+            </div>
+            <div class="teacher-actions">
+                <button id="clearLogBtn" class="clear-log-btn">🗑 Очистить лог</button>
+                <button id="exportLogBtn" class="export-btn">📎 Экспорт CSV</button>
+            </div>
+        </div>
+        <div class="log-table-container">
+            <table class="log-table" id="logTable">
+                <thead>
+                    <tr><th>Время</th><th>Имя</th><th>Цвет/Тема</th><th>Вопрос</th><th>Ответ ученика</th><th>Правильный ответ</th><th>Результат</th></tr>
+                </thead>
+                <tbody id="logTableBody">
+                    <tr><td colspan="7">Пока нет записей. Начните диагностику: введите имя и выполняйте задания.</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="font-size:0.8rem; margin-top:10px; text-align:center;">⭐ Каждый ответ (правильный/неправильный) автоматически фиксируется. Данные хранятся только во время сессии.</div>
+    </div>
+</div>
+<canvas id="confettiCanvas" class="confetti-canvas"></canvas>
+
+<script>
+    // --------------------------------------------------------------
+    // 1. ЦВЕТА И ЗАДАНИЯ (оранжевый 5 и зелёный 5 исправлены ранее, жёлтый 5 цвет ячейки изменён)
+    // --------------------------------------------------------------
+    const colorNames = ["Красный", "Оранжевый", "Жёлтый", "Зелёный", "Голубой", "Синий", "Фиолетовый"];
+
+    function getColorHex(name) {
+        const map = {
+            "Красный": "#FF4D4D", "Оранжевый": "#FF8C33", "Жёлтый": "#FFD700",
+            "Зелёный": "#33CC33", "Голубой": "#66CCFF", "Синий": "#4D4DFF",
+            "Фиолетовый": "#B84DFF", "Клубника": "#FF4D4D", "Банан": "#FFD700",
+            "Огурец": "#33CC33", "Морковь": "#FF8C33", "Лимон": "#FFD700",
+            "Лягушка": "#33CC33", "Василёк": "#66CCFF", "Кит": "#4D4DFF",
+            "Слива": "#B84DFF", "Помидор": "#FF4D4D", "Апельсин": "#FF8C33",
+            "Небо": "#66CCFF", "Виноград": "#B84DFF", "тёмно-зелёный": "#004D00",
+            "Красный+Жёлтый": "#FF8C33", "Синий+Жёлтый": "#33CC33", "Красный+Синий": "#B84DFF"
+        };
+        return map[name] || "#CCCCCC";
+    }
+
+    const tasks = [
+        // КРАСНЫЙ
+        [
+            { question: "Найди красный цвет.", options: ["Красный","Синий","Жёлтый"], correct:"Красный", type:"colored_text" },
+            { question: "Помидор — какого цвета?", options: ["Красный","Зелёный","Оранжевый"], correct:"Красный", type:"colored_text" },
+            { question: "Что бывает красным?", options: ["🍓 Клубника","🍌 Банан","🥒 Огурец"], correct:"🍓 Клубника", type:"colored_text" },
+            { question: "Красный + Жёлтый = ?", options: ["Оранжевый","Зелёный","Фиолетовый"], correct:"Оранжевый", type:"colored_text" },
+            { question: "Какой красный самый тёмный?", options: ["#FFB3B3","#FF4D4D","#8B0000"], correct:"#8B0000", type:"color_square" }
+        ],
+        // ОРАНЖЕВЫЙ - 5-й уровень изменён на цветные квадраты (ярко-рыжие оттенки)
+        [
+            { question: "Найди оранжевый цвет.", options: ["Оранжевый","Красный","Жёлтый"], correct:"Оранжевый", type:"colored_text" },
+            { question: "Апельсин — какого цвета?", options: ["Оранжевый","Красный","Зелёный"], correct:"Оранжевый", type:"colored_text" },
+            { question: "Что бывает оранжевым?", options: ["🥕 Морковь","🍋 Лимон","🍆 Слива"], correct:"🥕 Морковь", type:"colored_text" },
+            { question: "Как получить оранжевый?", options: ["Красный+Жёлтый","Синий+Жёлтый","Красный+Синий"], correct:"Красный+Жёлтый", type:"colored_text" },
+            { question: "Какой оранжевый самый светлый?", options: ["#FFC04C", "#FF8C00", "#FF4F00"], correct:"#FFC04C", type:"color_square" }
+        ],
+        // ЖЁЛТЫЙ
+        [
+            { question: "Найди жёлтый цвет.", options: ["Жёлтый","Красный","Зелёный"], correct:"Жёлтый", type:"colored_text" },
+            { question: "Банан — какого цвета?", options: ["Жёлтый","Зелёный","Красный"], correct:"Жёлтый", type:"colored_text" },
+            { question: "Что бывает жёлтым?", options: ["🍋 Лимон","🍅 Помидор","🥒 Огурец"], correct:"🍋 Лимон", type:"colored_text" },
+            { question: "Жёлтый + Синий = ?", options: ["Зелёный","Оранжевый","Фиолетовый"], correct:"Зелёный", type:"colored_text" },
+            { question: "Найди лишний оттенок (два жёлтых, один зелёный).", options: ["#FFFF66","#FFD700","#33CC33"], correct:"#33CC33", type:"color_square" }
+        ],
+        // ЗЕЛЁНЫЙ - 5-й уровень изменён на цветные квадраты (тёмно-зелёный, жёлтый, синий)
+        [
+            { question: "Найди зелёный цвет.", options: ["Зелёный","Синий","Жёлтый"], correct:"Зелёный", type:"colored_text" },
+            { question: "Огурец — какого цвета?", options: ["Зелёный","Красный","Жёлтый"], correct:"Зелёный", type:"colored_text" },
+            { question: "Что бывает зелёным?", options: ["🐸 Лягушка","🍓 Клубника","☀️ Солнце"], correct:"🐸 Лягушка", type:"colored_text" },
+            { question: "Синий + Жёлтый = ?", options: ["Зелёный","Оранжевый","Голубой"], correct:"Зелёный", type:"colored_text" },
+            { question: "Продолжи ряд: светло-зелёный → зелёный → ?", options: ["#004D00", "#FFD700", "#3399CC"], correct:"#004D00", type:"color_square" }
+        ],
+        // ГОЛУБОЙ
+        [
+            { question: "Найди голубой цвет.", options: ["Голубой","Синий","Зелёный"], correct:"Голубой", type:"colored_text" },
+            { question: "Небо — какого цвета?", options: ["Голубой","Синий","Белый"], correct:"Голубой", type:"colored_text" },
+            { question: "Что бывает голубым?", options: ["🌸 Василёк","🌿 Трава","🍅 Помидор"], correct:"🌸 Василёк", type:"colored_text" },
+            { question: "Синий + Белый = ?", options: ["Голубой","Фиолетовый","Зелёный"], correct:"Голубой", type:"colored_text" },
+            { question: "Какой голубой самый тёмный?", options: ["#CCFFFF","#66CCFF","#006699"], correct:"#006699", type:"color_square" }
+        ],
+        // СИНИЙ
+        [
+            { question: "Найди синий цвет.", options: ["Синий","Красный","Зелёный"], correct:"Синий", type:"colored_text" },
+            { question: "Море — какого цвета?", options: ["Синий","Голубой","Зелёный"], correct:"Синий", type:"colored_text" },
+            { question: "Что бывает синим?", options: ["🐋 Кит","🍊 Апельсин","☀️ Солнце"], correct:"🐋 Кит", type:"colored_text" },
+            { question: "Красный + Синий = ?", options: ["Фиолетовый","Зелёный","Оранжевый"], correct:"Фиолетовый", type:"colored_text" },
+            { question: "Синий + Белый = ?", options: ["Голубой","Фиолетовый","Зелёный"], correct:"Голубой", type:"colored_text" }
+        ],
+        // ФИОЛЕТОВЫЙ (исправлен уровень 5: розовый заменён на жёлтый)
+        [
+            { question: "Найди фиолетовый цвет.", options: ["Фиолетовый","Синий","Красный"], correct:"Фиолетовый", type:"colored_text" },
+            { question: "Виноград — какого цвета?", options: ["Фиолетовый","Зелёный","Красный"], correct:"Фиолетовый", type:"colored_text" },
+            { question: "Что бывает фиолетовым?", options: ["🍆 Слива","🥕 Морковь","🥒 Огурец"], correct:"🍆 Слива", type:"colored_text" },
+            { question: "Красный + Синий = ?", options: ["Фиолетовый","Зелёный","Оранжевый"], correct:"Фиолетовый", type:"colored_text" },
+            { question: "Найди лишний оттенок (два фиолетовых, один жёлтый).", options: ["#E6B3FF","#B84DFF","#FFD700"], correct:"#FFD700", type:"color_square" }
+        ]
+    ];
+
+    // --------------------------------------------------------------
+    // 2. ЗВУК (без изменений)
+    // --------------------------------------------------------------
+    let muted = false;
+    let currentAudio = null;
+    function stopCurrentAudio() { if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; currentAudio = null; } }
+    function playVoice(row, level) {
+        if (muted) return;
+        const eng = ["red", "orange", "yellow", "green", "lightblue", "blue", "purple"];
+        const baseName = `audio/${eng[row]}_${level+1}`;
+        const audio = new Audio();
+        audio.addEventListener('error', function() { if (audio.src.endsWith('.ogg')) { audio.src = `${baseName}.mp3`; audio.load(); audio.play().catch(e=>console.log); } });
+        audio.src = `${baseName}.ogg`;
+        currentAudio = audio;
+        audio.play().catch(e => { if (!audio.src.endsWith('.mp3')) { audio.src = `${baseName}.mp3`; audio.play().catch(e2=>console.log); } });
+        audio.onended = () => { if (currentAudio === audio) currentAudio = null; };
+    }
+    function enableAudio() { const silentAudio = new Audio(); silentAudio.play().then(()=>silentAudio.pause()).catch(e=>console.log); }
+
+    // --------------------------------------------------------------
+    // 3. ИГРОВАЯ ЛОГИКА + ДИАГНОСТИКА
+    // --------------------------------------------------------------
+    let completed = Array(7).fill().map(() => Array(5).fill(false));
+    let starsEarned = 0;
+    let stickersUnlocked = [false, false, false, false, false];
+    let currentCell = null;
+
+    let diagnosticsLog = [];
+    let currentStudent = "";
+
+    function addToLog(questionText, selectedAnswer, correctAnswer, isCorrect, rowIdx, levelIdx) {
+        if (!currentStudent || currentStudent.trim() === "") {
+            if(!window._warnedName) { 
+                setTimeout(()=>{ 
+                    const fb = document.getElementById('feedbackMsg');
+                    if(fb) fb.innerHTML = "⚠️ В панели педагога введите имя ученика для диагностики!"; 
+                    setTimeout(()=>{ if(fb && fb.innerHTML.includes("диагностики")) fb.innerHTML=""; },2500);
+                },10);
+                window._warnedName = true;
+            }
+        }
+        const studentName = (currentStudent && currentStudent.trim() !== "") ? currentStudent.trim() : "Не указано";
+        const colorTheme = colorNames[rowIdx] || "?";
+        const now = new Date();
+        const timeStr = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+        diagnosticsLog.push({
+            time: timeStr,
+            student: studentName,
+            theme: colorTheme,
+            question: questionText,
+            answer: selectedAnswer,
+            correctAnswer: correctAnswer,
+            result: isCorrect ? "✅ Верно" : "❌ Неверно",
+            isCorrectFlag: isCorrect
+        });
+        renderTeacherLog();
+    }
+
+    function renderTeacherLog() {
+        const tbody = document.getElementById('logTableBody');
+        if (!tbody) return;
+        if (diagnosticsLog.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7">Пока нет записей. Начните диагностику: введите имя и выполняйте задания.</td></tr>';
+            return;
+        }
+        let html = '';
+        for (let log of diagnosticsLog) {
+            const rowClass = log.isCorrectFlag ? 'correct' : 'wrong';
+            html += `<tr class="${rowClass}">
+                          <td>${escapeHtml(log.time)}</td>
+                          <td>${escapeHtml(log.student)}</td>
+                          <td>${escapeHtml(log.theme)}</td>
+                          <td>${escapeHtml(log.question)}</td>
+                          <td>${escapeHtml(log.answer)}</td>
+                          <td>${escapeHtml(log.correctAnswer)}</td>
+                          <td>${escapeHtml(log.result)}</td>
+                        </tr>`;
+        }
+        tbody.innerHTML = html;
+    }
+
+    function escapeHtml(str) { return String(str).replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+    function clearLog() {
+        diagnosticsLog = [];
+        renderTeacherLog();
+        window._warnedName = false;
+        const fb = document.getElementById('feedbackMsg');
+        if(fb) { fb.innerHTML = "📋 Журнал диагностики очищен."; setTimeout(()=>{ if(fb.innerHTML === "📋 Журнал диагностики очищен.") fb.innerHTML = ""; },1500); }
+    }
+
+    function exportLogToCSV() {
+        if (diagnosticsLog.length === 0) { 
+            const fb = document.getElementById('feedbackMsg');
+            if(fb) { fb.innerHTML = "Нет данных для экспорта."; setTimeout(()=>{ if(fb.innerHTML === "Нет данных для экспорта.") fb.innerHTML=""; },1500); }
+            return; 
+        }
+        let csvRows = [["Время","Имя ученика","Цвет/Тема","Вопрос","Ответ ученика","Правильный ответ","Результат"]];
+        for (let log of diagnosticsLog) {
+            csvRows.push([log.time, log.student, log.theme, log.question, log.answer, log.correctAnswer, log.result]);
+        }
+        const csvContent = csvRows.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(",")).join("\n");
+        const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.setAttribute("download", `diagnostika_${currentStudent || "student"}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
+    function updateProgress() {
+        const starSpan = document.getElementById('starCount'); if(starSpan) starSpan.innerText = starsEarned;
+        const thresholds = [7,14,21,28,35];
+        const stickerElements = document.querySelectorAll('.sticker');
+        for (let i=0; i<thresholds.length; i++) {
+            if (starsEarned >= thresholds[i] && !stickersUnlocked[i]) {
+                stickersUnlocked[i] = true;
+                if(stickerElements[i]) stickerElements[i].classList.add('unlocked');
+                const feedbackDiv = document.getElementById('feedbackMsg');
+                if(feedbackDiv) { feedbackDiv.innerHTML = `🎉 Ты получил новую наклейку! 🎉`; setTimeout(()=>{ if(feedbackDiv && feedbackDiv.innerHTML.includes("наклейку")) feedbackDiv.innerHTML=''; },2000); }
+            }
+        }
+        if (starsEarned === 35) showDiplom();
+    }
+    function showDiplom() {
+        let name = prompt("Поздравляем! Ты прошёл все 35 заданий! Напиши своё имя для диплома:", "Молодец");
+        if (!name) name = "Знаток цвета";
+        alert(`🎓 ДИПЛОМ 🎓\nВручается ${name} за отличное знание цветов!`);
+        startConfetti();
+    }
+    function startConfetti() { 
+        const canvas = document.getElementById('confettiCanvas');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        for(let i=0;i<150;i++) particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height-canvas.height, size: Math.random()*6+2, color: `hsl(${Math.random()*360},70%,60%)`, speedY: Math.random()*5+2, speedX: Math.random()*2-1 });
+        function animate() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            let active = false;
+            for(let p of particles) { p.y+=p.speedY; p.x+=p.speedX; if(p.y<canvas.height+50) active=true; ctx.fillStyle=p.color; ctx.fillRect(p.x,p.y,p.size,p.size); }
+            if(active) requestAnimationFrame(animate); else canvas.style.display='none';
+        }
+        canvas.style.display='block'; animate(); setTimeout(()=>canvas.style.display='none',4000);
+    }
+
+    function renderGrid() {
+        const gridDiv = document.getElementById('grid');
+        if(!gridDiv) return;
+        gridDiv.innerHTML = '';
+        for(let row=0;row<7;row++) {
+            const rowDiv = document.createElement('div'); rowDiv.className='row'; rowDiv.setAttribute('data-row',row);
+            for(let level=0;level<5;level++) {
+                const cell = document.createElement('div'); cell.className='cell';
+                if(completed[row][level]) cell.classList.add('completed');
+                cell.setAttribute('data-level',level);
+                cell.innerText = completed[row][level] ? '' : (level+1);
+                cell.addEventListener('click', (function(r,l){ return function(){ openTask(r,l); }; })(row,level));
+                rowDiv.appendChild(cell);
+            }
+            gridDiv.appendChild(rowDiv);
+        }
+    }
+
+    function renderOptions(task) {
+        const optionsDiv = document.getElementById('optionsContainer');
+        if(!optionsDiv) return;
+        optionsDiv.innerHTML = '';
+        let opts = [...task.options];
+        for(let i=opts.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [opts[i],opts[j]]=[opts[j],opts[i]]; }
+        if(task.type === 'color_square') {
+            opts.forEach(opt => {
+                const square = document.createElement('div'); square.className='color-square'; square.style.backgroundColor=opt;
+                square.addEventListener('click', ()=>checkAnswer(opt,task.correct));
+                optionsDiv.appendChild(square);
+            });
+        } else {
+            opts.forEach(opt => {
+                const btn = document.createElement('button'); btn.className='option-btn'; btn.innerText=opt;
+                let bgColor = getColorHex(opt);
+                if(bgColor==="#CCCCCC") { btn.style.background="#ffdd99"; btn.style.color="#5a3e2b"; btn.style.textShadow="none"; }
+                else { btn.style.background=bgColor; btn.style.color="white"; }
+                btn.addEventListener('click',()=>checkAnswer(opt,task.correct));
+                optionsDiv.appendChild(btn);
+            });
+        }
+    }
+
+    function checkAnswer(selected, correct) {
+        if(!currentCell) return;
+        const {row, level} = currentCell;
+        const task = tasks[row][level];
+        const isCorrect = (selected === correct);
+        addToLog(task.question, selected, correct, isCorrect, row, level);
+        
+        if(isCorrect) {
+            const feedbackDiv = document.getElementById('feedbackMsg');
+            if(feedbackDiv) { feedbackDiv.innerHTML = '✅ Верно! +1 звезда!'; feedbackDiv.style.color='green'; }
+            completed[row][level]=true; starsEarned++; updateProgress(); renderGrid();
+            setTimeout(()=>{ 
+                const qDiv = document.getElementById('questionText'); if(qDiv) qDiv.innerHTML='Задание выполнено! Выбери следующую клетку.';
+                const optsDiv = document.getElementById('optionsContainer'); if(optsDiv) optsDiv.innerHTML='';
+                const fbDiv = document.getElementById('feedbackMsg'); if(fbDiv) fbDiv.innerHTML='';
+                currentCell=null; 
+                const titleSpan = document.getElementById('taskTitle'); if(titleSpan) titleSpan.innerText='✔️ Задание выполнено';
+            },1200);
+        } else {
+            const feedbackDiv = document.getElementById('feedbackMsg');
+            if(feedbackDiv) { feedbackDiv.innerHTML = '❌ Неверно. Попробуй ещё раз! Педагог поможет.'; feedbackDiv.style.color='red'; }
+        }
+    }
+
+    function openTask(row, level) {
+        if(completed[row][level]) { 
+            const feedbackDiv = document.getElementById('feedbackMsg');
+            if(feedbackDiv) { feedbackDiv.innerHTML="Это задание уже выполнено! ⭐"; setTimeout(()=>feedbackDiv.innerHTML='',1500); }
+            return; 
+        }
+        currentCell = {row, level};
+        const task = tasks[row][level];
+        const qDiv = document.getElementById('questionText'); if(qDiv) qDiv.innerHTML = task.question;
+        renderOptions(task);
+        playVoice(row, level);
+        const fDiv = document.getElementById('feedbackMsg'); if(fDiv) fDiv.innerHTML = '';
+        const titleSpan = document.getElementById('taskTitle'); if(titleSpan) titleSpan.innerHTML = `${colorNames[row]} — уровень ${level+1}`;
+    }
+
+    function resetGame() {
+        stopCurrentAudio();
+        completed = Array(7).fill().map(()=>Array(5).fill(false));
+        starsEarned=0; stickersUnlocked.fill(false); 
+        document.querySelectorAll('.sticker').forEach(s=>s.classList.remove('unlocked'));
+        updateProgress(); renderGrid();
+        const qDiv = document.getElementById('questionText'); if(qDiv) qDiv.innerHTML='Нажми на любую цветную клетку, чтобы начать';
+        const optsDiv = document.getElementById('optionsContainer'); if(optsDiv) optsDiv.innerHTML='';
+        const fDiv = document.getElementById('feedbackMsg'); if(fDiv) fDiv.innerHTML='';
+        currentCell=null;
+        const titleSpan = document.getElementById('taskTitle'); if(titleSpan) titleSpan.innerText='✔️ Задание';
+        const canvas = document.getElementById('confettiCanvas'); if(canvas){ canvas.style.display='none'; canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);}
+    }
+
+    function toggleTeacherPanel() {
+        const panel = document.getElementById('teacherPanel');
+        if(panel) panel.classList.toggle('visible');
+    }
+
+    function setStudentName() {
+        const input = document.getElementById('studentNameInput');
+        if(!input) return;
+        const newName = input.value.trim();
+        if(newName === "") { 
+            const fb = document.getElementById('feedbackMsg');
+            if(fb) { fb.innerHTML = "⚠️ Пожалуйста, введите имя ученика."; setTimeout(()=>{ if(fb.innerHTML === "⚠️ Пожалуйста, введите имя ученика.") fb.innerHTML=""; },2000); }
+            return; 
+        }
+        currentStudent = newName;
+        const badge = document.getElementById('currentStudentBadge');
+        if(badge) badge.innerText = `Текущий: ${currentStudent}`;
+        window._warnedName = false;
+        const fb = document.getElementById('feedbackMsg');
+        if(fb) { fb.innerHTML = `✅ Диагностика для ученика "${currentStudent}" начата.`; setTimeout(()=>{ if(fb.innerHTML.includes("начата")) fb.innerHTML=""; },2000); }
+    }
+
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', () => {
+        renderGrid(); updateProgress();
+        document.getElementById('fullscreenBtn')?.addEventListener('click', () => { if(!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); });
+        document.getElementById('muteVoiceBtn')?.addEventListener('click', () => { muted = !muted; const btn = document.getElementById('muteVoiceBtn'); if(btn) btn.innerHTML = muted ? "🔇 Звук выкл." : "🔊 Звук вкл."; if(muted) stopCurrentAudio(); });
+        document.getElementById('forceAudioBtn')?.addEventListener('click', enableAudio);
+        document.getElementById('resetGame')?.addEventListener('click', resetGame);
+        document.getElementById('toggleTeacherBtn')?.addEventListener('click', toggleTeacherPanel);
+        document.getElementById('setStudentNameBtn')?.addEventListener('click', setStudentName);
+        document.getElementById('clearLogBtn')?.addEventListener('click', clearLog);
+        document.getElementById('exportLogBtn')?.addEventListener('click', exportLogToCSV);
+        const nameInput = document.getElementById('studentNameInput');
+        if(nameInput) nameInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') setStudentName(); });
+    });
+</script>
+</body>
+</html>
+
